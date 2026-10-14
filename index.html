@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feigenbaum Constants to 10,000 Digits</title>
+<meta name="description" content="High-precision Feigenbaum constants α and δ for unimodal maps of degree 2, 4, 6 and 8: 10,000 digits for the classical constants, 5,000 digits for the higher-degree ones, each checked three independent ways.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js"></script>
+<script src="assets/data.js"></script>
+</head>
+<body>
+<header class="hero">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <p class="eyebrow">Universality in chaos · computed 2026</p>
+    <h1>The Feigenbaum constants,<br><span class="accent">to ten thousand digits</span></h1>
+    <p class="lede">The route to chaos by period doubling is governed by two universal numbers, δ and α. This project computes them to 10,000 digits for ordinary (quadratic) maps and to 5,000 digits for quartic, sextic and octic maps. Every digit has been checked three independent ways.</p>
+    <div class="digit-stream" aria-label="delta = 4.669201609102990671853203820466...">
+      <span class="sym">δ =</span> <span id="stream-delta" class="mono"></span>
+    </div>
+    <div class="digit-stream" aria-label="alpha = 2.502907875095892822283902873218...">
+      <span class="sym">α =</span> <span id="stream-alpha" class="mono"></span>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="tile-num">10,000</div><div class="tile-label">digits of the classical δ and α<br><span class="muted">10× the previous public tables</span></div></div>
+      <div class="tile"><div class="tile-num">5,000</div><div class="tile-label">digits of δ and α for degree 4, 6, 8<br><span class="muted">up to 130× the previous best</span></div></div>
+      <div class="tile"><div class="tile-num">3</div><div class="tile-label">independent checks<br><span class="muted">two discretisations · second code · published proofs</span></div></div>
+    </div>
+    <nav class="toc">
+      <a href="#bifurcation">Bifurcation diagram</a><a href="#delta">δ</a><a href="#renorm">α and renormalisation</a><a href="#records">Records</a><a href="#method">Method</a><a href="#digits">The digits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section id="bifurcation">
+  <h2>Period doubling and the bifurcation diagram</h2>
+  <p>Iterate a one-hump map such as <span class="math">x ↦ 1 − μx²</span> and record where the orbit settles. As μ grows, the single fixed point splits into a 2-cycle, then a 4-cycle, then 8, 16, … The doublings come faster and faster and pile up at <span class="math">μ<sub>∞</sub></span>, where chaos begins.</p>
+  <div class="controls" role="group" aria-label="Bifurcation diagram controls">
+    <div class="seg" id="bif-degree" role="radiogroup" aria-label="Degree of the hump">
+      <button data-z="2" class="on" role="radio" aria-checked="true">x²</button><button data-z="4" role="radio" aria-checked="false">x⁴</button><button data-z="6" role="radio" aria-checked="false">x⁶</button><button data-z="8" role="radio" aria-checked="false">x⁸</button>
+    </div>
+    <button id="bif-deeper" class="btn primary">Zoom one level deeper ⟶</button>
+    <button id="bif-reset" class="btn">Reset</button>
+    <span id="bif-level" class="muted small"></span>
+  </div>
+  <div class="figure">
+    <canvas id="bif" aria-label="Bifurcation diagram of x -> 1 - mu |x|^z"></canvas>
+    <div id="bif-tip" class="tip" hidden></div>
+    <div class="fig-note">Drag to zoom into a region · double-click to reset</div>
+  </div>
+  <p class="caption"><b>Self-similarity.</b> "Zoom one level deeper" shrinks the window around μ<sub>∞</sub> by <b>δ</b> horizontally and by <b>α</b> vertically, flipping it each time, and the same picture comes back. Those two zoom factors are the Feigenbaum constants. For the quadratic hump they are δ ≈ 4.669 and α ≈ 2.503. A flatter hump (x⁴, x⁶, x⁸) gives different constants, and that is the "degree" in this project.</p>
+</section>
+
+<section id="delta">
+  <h2>δ: how fast the doublings arrive</h2>
+  <p>Let μ<sub>n</sub> be the parameter where the 2<sup>n</sup>-cycle is most stable. The gaps between successive μ<sub>n</sub> shrink geometrically. Their ratio converges to δ, and the limit is the same for every smooth map with the same kind of hump. That universality is Feigenbaum's discovery (1978).</p>
+  <div class="figure"><div id="ratio-plot" class="plot" role="img" aria-label="Ratio of successive gaps converging to delta for each degree"></div></div>
+  <p class="caption">Ratios (μ<sub>n</sub> − μ<sub>n−1</sub>)/(μ<sub>n+1</sub> − μ<sub>n</sub>) computed from the actual maps, against our high-precision δ (dashed). Hover for values.</p>
+</section>
+
+<section id="renorm">
+  <h2>α and the renormalisation operator</h2>
+  <p>Why is there a universal number at all? Look at the map applied twice, <span class="math">g∘g</span>, near its top: it is again a one-hump map, upside down and smaller. Rescale it back up and you get a new map,</p>
+  <p class="display-math">(𝒯g)(x) = g(g(λx)) / λ,  &nbsp; λ = g(1).</p>
+  <p>Doubling the period of g is the same as an ordinary bifurcation of 𝒯g, so applying 𝒯 is "zooming in one level". At μ<sub>∞</sub> you can zoom forever, so repeated applications of 𝒯 converge to a fixed point, the <b>Feigenbaum function</b> g = 𝒯g. Then <b>α = −1/g(1)</b>. And <b>δ</b> is the rate at which 𝒯 pushes you away from g when you start slightly off μ<sub>∞</sub>.</p>
+  <div class="controls" role="group" aria-label="Renormalisation controls">
+    <div class="seg" id="ren-degree" role="radiogroup" aria-label="Degree">
+      <button data-z="2" class="on" role="radio" aria-checked="true">x²</button><button data-z="4" role="radio" aria-checked="false">x⁴</button><button data-z="6" role="radio" aria-checked="false">x⁶</button><button data-z="8" role="radio" aria-checked="false">x⁸</button>
+    </div>
+    <label class="slider">applications of 𝒯: <b id="ren-k-val">3</b><input id="ren-k" type="range" min="0" max="11" value="3"></label>
+    <label class="slider">start offset μ − μ<sub>∞</sub>: <b id="ren-eps-val">0</b><input id="ren-eps" type="range" min="0" max="8" value="0"></label>
+  </div>
+  <div class="figure"><div id="ren-plot" class="plot" role="img" aria-label="Iterates of the renormalisation operator converging to the Feigenbaum function"></div></div>
+  <p class="caption">Start from <span class="math">f(x) = 1 − μ|x|<sup>z</sup></span> at μ = μ<sub>∞</sub> and apply 𝒯 repeatedly: the curves collapse onto the fixed point g (dashed). Nudge the start off μ<sub>∞</sub> and they follow g for a while, then peel away. Each application of 𝒯 multiplies the offset by δ, so a 10× smaller nudge buys about log(10)/log(δ) ≈ 1.5 more steps.</p>
+  <div class="figure"><div id="g-plot" class="plot short" role="img" aria-label="The Feigenbaum fixed point g for degrees 2, 4, 6, 8"></div></div>
+  <p class="caption">The fixed points themselves. A flatter top (higher degree) gives a different g, and so a different α = −1/g(1) and δ.</p>
+</section>
+
+<section id="records">
+  <h2>Records</h2>
+  <p>The most digits published for each constant before this project, as far as we could find, against this computation. Logarithmic scale.</p>
+  <div class="figure"><div id="records-plot" class="plot" role="img" aria-label="Dumbbell chart of previous best digit counts versus this work"></div></div>
+  <div class="table-wrap">
+  <table class="records">
+    <thead><tr><th>Constant</th><th>Value</th><th class="num">Previously</th><th>Source</th><th class="num">Now</th><th>OEIS</th></tr></thead>
+    <tbody id="records-body"></tbody>
+  </table>
+  </div>
+  <p class="caption">For the classical constants, Molteni (2016) <i>reported</i> about 10,000 digits but did not publish them. The largest public table (Broadhurst, 1999) had 1,018 or 1,019 digits. "Proven" means rigorously certified by a computer-assisted proof. All our digits agree with every proven digit.</p>
+</section>
+
+<section id="method">
+  <h2>How it was computed</h2>
+  <div class="cols">
+    <div>
+      <p><b>Chebyshev collocation.</b> Write the fixed point as a sum of Chebyshev polynomials in <span class="math">t = |x|<sup>z</sup></span>, and require the equation <span class="math">g(1)·g(x) = g(g(g(1)·x))</span> to hold exactly at n carefully chosen points. That gives n equations in n unknowns, solved by Newton's method in 34,000-bit arithmetic. δ is the leading eigenvalue of 𝒯 linearised at g, and is solved the same way. This extends Molteni's method (2016) from the quadratic case to any even degree.</p>
+      <p><b>Why it converges so fast.</b> The Feigenbaum function is analytic, so its Chebyshev coefficients decay geometrically. Each extra node buys a fixed number of digits: about 1.6 for the quadratic case and 0.7 for degree 8. 6,514 nodes gives 10,000 digits.</p>
+    </div>
+    <div class="figure"><div id="conv-plot" class="plot short" role="img" aria-label="Correct digits of alpha versus number of collocation nodes"></div>
+    <p class="caption">Correct digits of α vs number of nodes, small runs. The lines continue straight out to the production runs.</p></div>
+  </div>
+  <h3>Verification</h3>
+  <div class="table-wrap">
+  <table class="verify">
+    <thead><tr><th>Constant</th><th class="num">Digits published</th><th class="num">Two discretisations agree to</th><th class="num">Independent code agrees on</th><th>Matches published digits</th></tr></thead>
+    <tbody id="verify-body"></tbody>
+  </table>
+  </div>
+  <p class="caption"><b>The three checks.</b></p>
+  <ol class="caption">
+    <li>Every value was computed twice, with different node counts (n and ≈1.1n) and different precisions. The published digits stop 10 short of where the two agree.</li>
+    <li>A second, independent implementation agrees on every digit it computed. It uses Legendre polynomials, different nodes, Arb ball arithmetic and full Newton steps, and shares no code with the first.</li>
+    <li>The results agree with every previously published digit, including the 325 rigorously proven digits of δ for degree 4. Simulating period doubling in the maps directly reproduces each δ to 7–12 digits.</li>
+  </ol>
+  <p class="caption">These are computed digits, not a proof.</p>
+</section>
+
+<section id="digits">
+  <h2>The digits</h2>
+  <div class="controls" role="group" aria-label="Digit explorer controls">
+    <select id="dig-select" aria-label="Constant"></select>
+    <input id="dig-search" type="search" placeholder="find a digit string, e.g. 2026" aria-label="Search digits">
+    <span id="dig-found" class="muted small"></span>
+    <button id="dig-copy" class="btn">Copy</button>
+    <button id="dig-download" class="btn">Download b-file</button>
+  </div>
+  <div id="dig-box" class="digits mono" tabindex="0" aria-label="Digits"></div>
+</section>
+</main>
+
+<footer>
+  <div class="foot-cols">
+    <div>
+      <h4>References</h4>
+      <ul>
+        <li>M. J. Feigenbaum, <i>Quantitative universality for a class of nonlinear transformations</i>, J. Stat. Phys. 19 (1978).</li>
+        <li>K. Briggs, <a href="https://doi.org/10.1090/S0025-5718-1991-1079009-6"><i>A precise calculation of the Feigenbaum constants</i></a>, Math. Comp. 57 (1991).</li>
+        <li>D. Broadhurst, <i>Feigenbaum constants to 1018 decimal places</i> (1999).</li>
+        <li>R. J. Mathar, <a href="https://arxiv.org/abs/1008.4608"><i>Chebyshev series representation of Feigenbaum's period-doubling function</i></a> (2010).</li>
+        <li>A. Molteni, <a href="https://arxiv.org/abs/1602.02357"><i>An efficient method for the computation of the Feigenbaum constants to high precision</i></a> (2016).</li>
+        <li>A. D. Burbanks, A. H. Osbaldestin, J. A. Thurlby, <a href="https://doi.org/10.1063/5.0054823"><i>Rigorous computer-assisted bounds … critical point of degree 4</i></a>, J. Math. Phys. 62 (2021).</li>
+        <li>M. Breden, J. Gonzalez, J. D. Mireles James, <a href="https://arxiv.org/abs/2409.20457"><i>Validated enclosure of renormalization fixed points via Chebyshev series and the DFT</i></a> (2024).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>This project</h4>
+      <p>William Toner, 2026. The code and all the digits are in the repository. The OEIS entries are A006890, A006891, A195102, A396218 and A396219.</p>
+      <p class="muted small">Interactive figures: the bifurcation diagram and renormalisation iterates are computed live in your browser.</p>
+    </div>
+  </div>
+</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>

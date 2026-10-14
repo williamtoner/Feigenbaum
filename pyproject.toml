@@ -1,0 +1,15 @@
+[project]
+name = "feigenbaum"
+version = "0.1.0"
+description = "High-precision Feigenbaum constants (alpha, delta) for unimodal maps of degree 2, 4, 6, 8"
+authors = [
+    { name = "William Toner", email = "williamtoner@sakana.ai" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "gmpy2>=2.3.2",
+    "mpmath>=1.4.1",
+    "numpy>=2.5.4",
+    "python-flint>=0.9.0",
+    "scipy>=1.18.1",
+]
